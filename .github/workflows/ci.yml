@@ -30,6 +30,14 @@ jobs:
         with:
           version: 3.x
 
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.5
+
+      - name: Install dependencies
+        run: task deps
+
       - name: Run linter
         run: task lint
 

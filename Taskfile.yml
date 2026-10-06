@@ -1,0 +1,53 @@
+version: '3'
+
+vars:
+  BIN_DIR: bin
+
+tasks:
+  default:
+    desc: "Show help and list available tasks"
+    cmds:
+      - task --list
+
+  test:
+    desc: "Run all unit tests with race detection"
+    cmds:
+      - go test -v -race ./...
+
+  test:short:
+    desc: "Run quick tests without race detection"
+    cmds:
+      - go test -short ./...
+
+  test:cover:
+    desc: "Run tests and generate HTML coverage report"
+    cmds:
+      - go test -coverprofile=coverage.out ./...
+      - go tool cover -html=coverage.out -o coverage.html
+      - echo "Coverage report saved to coverage.html"
+
+  bench:
+    desc: "Run Go benchmarks"
+    cmds:
+      - go test -bench=. -benchmem ./...
+
+  lint:
+    desc: "Run golangci-lint for code quality check"
+    cmds:
+      - golangci-lint run ./...
+
+  fmt:
+    desc: "Format code using gofmt and goimports"
+    cmds:
+      - golangci-lint fmt
+
+  deps:
+    desc: "Download and tidy up Go module dependencies"
+    cmds:
+      - go mod download
+      - go mod tidy
+
+  clean:
+    desc: "Remove compiled binaries and temporary coverage files"
+    cmds:
+      - rm -f coverage.out coverage.html

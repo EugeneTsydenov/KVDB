@@ -1,3 +1,24 @@
-.vscode
-vscode
-report.xml
+# Compiled binaries
+/bin/
+*.exe
+*.exe;
+*.dll
+*.so
+*.dylib
+
+# Test and coverage artifacts
+*.out
+*.html
+*.test
+cpu.pprof
+mem.pprof
+
+# IDE & Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS generated
+.DS_Store
+Thumbs.db

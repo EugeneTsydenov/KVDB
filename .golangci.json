@@ -1,0 +1,149 @@
+{
+    "formatters": {
+        "enable": ["gofumpt", "golines"],
+        "exclusions": {
+            "generated": "lax",
+            "paths": ["third_party$", "builtin$", "examples$"]
+        },
+        "settings": {
+            "golines": {
+                "max-len": 120,
+                "tab-len": 8,
+                "shorten-comments": false
+            }
+        }
+    },
+    "linters": {
+        "enable": [
+            "asciicheck",
+            "bidichk",
+            "bodyclose",
+            "copyloopvar",
+            "cyclop",
+            "decorder",
+            "depguard",
+            "dogsled",
+            "dupl",
+            "dupword",
+            "funlen",
+            "gocheckcompilerdirectives",
+            "gochecknoinits",
+            "gocognit",
+            "goconst",
+            "gocyclo",
+            "godot",
+            "godox",
+            "goheader",
+            "gomoddirectives",
+            "gomodguard",
+            "goprintffuncname",
+            "grouper",
+            "inamedparam",
+            "interfacebloat",
+            "lll",
+            "maintidx",
+            "misspell",
+            "mnd",
+            "nakedret",
+            "nestif",
+            "nlreturn",
+            "nolintlint",
+            "nosprintfhostport",
+            "prealloc",
+            "predeclared",
+            "promlinter",
+            "revive",
+            "tagalign",
+            "testableexamples",
+            "testpackage",
+            "tparallel",
+            "unconvert",
+            "unparam",
+            "usestdlibvars",
+            "whitespace",
+            "errcheck",
+            "errorlint",
+            "contextcheck",
+            "nilnil",
+            "sqlclosecheck",
+            "forbidigo"
+        ],
+        "exclusions": {
+            "generated": "lax",
+            "paths": ["third_party$", "builtin$", "examples$"],
+            "presets": [
+                "comments",
+                "common-false-positives",
+                "legacy",
+                "std-error-handling"
+            ]
+        },
+        "settings": {
+            "depguard": {
+                "rules": {
+                    "main": {
+                        "list-mode": "lax",
+                        "files": ["!**/*_a _file.go"],
+                        "allow": ["$gostd", "github.com/EugeneTsydenov"],
+                        "deny": [
+                            {
+                                "pkg": "math/rand$",
+                                "desc": "use math/rand/v2"
+                            },
+                            {
+                                "pkg": "github.com/sirupsen/logrus",
+                                "desc": "not allowed"
+                            },
+                            {
+                                "pkg": "github.com/pkg/errors",
+                                "desc": "Should be replaced by standard lib errors package"
+                            }
+                        ]
+                    }
+                }
+            },
+            "forbidigo": {
+                "forbid": [
+                    {
+                        "pattern": "^fmt\\.Print",
+                        "msg": "use logger"
+                    }
+                ]
+            }
+        }
+    },
+    "output": {
+        "formats": {
+            "checkstyle": {
+                "path": "report.xml"
+            },
+            "json": {
+                "path": "stderr"
+            },
+            "text": {
+                "path": "stdout"
+            }
+        },
+        "path-prefix": ""
+    },
+    "run": {
+        "allow-parallel-runners": true,
+        "allow-serial-runners": true,
+        "build-tags": ["mytag"],
+        "concurrency": 4,
+        "go": "1.23.1",
+        "issues-exit-code": 2,
+        "modules-download-mode": "readonly",
+        "tests": false
+    },
+    "severity": {
+        "default": "error",
+        "rules": [
+            {
+                "linters": ["dupl"],
+                "severity": "info"
+            }
+        ]
+    },
+    "version": "2"
+}

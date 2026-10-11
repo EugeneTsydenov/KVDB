@@ -10,7 +10,7 @@ var _ Storage = (*MemoryStore)(nil)
 
 var ErrEntryNotFound = errors.New("entry not found")
 
-// memoryStore is an in-memory implementation of the Storage interface.
+// MemoryStore is an in-memory implementation of the Storage interface.
 type MemoryStore struct {
 	mu      sync.RWMutex
 	entries map[string]Entry

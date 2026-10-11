@@ -27,7 +27,7 @@ A Redis-inspired Key-Value database built for learning: in-memory storage, UDP n
 
 To build and run this project locally, ensure you have the following installed:
 
-* **Go** (version `1.22` or higher)
+* **Go** (version `1.25` or higher)
 * **Task** (Build tool alternative to `make`) — [Installation Guide](https://taskfile.dev/installation/)
 * **golangci-lint** — [Installation Guide](https://golangci-lint.run/welcome/install/)
 

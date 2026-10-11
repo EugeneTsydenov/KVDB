@@ -57,6 +57,7 @@ func (s *MemoryStore) Get(key string) (Value, error) {
 
 	if !ok {
 		s.mu.RUnlock()
+
 		return Value{}, ErrEntryNotFound
 	}
 
@@ -72,6 +73,7 @@ func (s *MemoryStore) Get(key string) (Value, error) {
 	}
 
 	s.mu.RUnlock()
+
 	return entry.Value, nil
 }
 
@@ -85,5 +87,6 @@ func (s *MemoryStore) Del(key string) bool {
 	}
 
 	delete(s.entries, key)
+
 	return true
 }

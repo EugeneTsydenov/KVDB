@@ -31,15 +31,23 @@ To build and run this project locally, ensure you have the following installed:
 * **Task** (Build tool alternative to `make`) — [Installation Guide](https://taskfile.dev/installation/)
 * **golangci-lint** — [Installation Guide](https://golangci-lint.run/welcome/install/)
 
-## 🚀 Quick Start
+## 🛠 Development Commands (Taskfile)
 
-```bash
-git clone https://github.com/<your-username>/<repo-name>.git
-cd <repo-name>
+We use `Taskfile.yml` to streamline building, testing, linting, and formatting tasks.
 
-go run ./cmd/server   # start a node
-go run ./cmd/cli      # start the client
-```
+### Available Tasks:
+
+| Command | Description |
+| :--- | :--- |
+| `task` | Show help and list all available tasks |
+| `task test` | Run unit tests with race condition detection (`-race`) |
+| `task test:short` | Run quick tests without race detection |
+| `task test:cover` | Run tests and generate an HTML coverage report |
+| `task bench` | Run Go benchmarks |
+| `task lint` | Run `golangci-lint` for code quality checks |
+| `task fmt` | Format code using `gofmt` / `golangci-lint fmt` |
+| `task deps` | Download and tidy up Go module dependencies |
+| `task clean` | Remove temporary build files and coverage reports |
 
 ## 📁 Structure
 

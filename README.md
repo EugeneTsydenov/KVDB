@@ -23,8 +23,6 @@ A Redis-inspired Key-Value database built for learning: in-memory storage, UDP n
 - Lua scripts
 - Sharding, replication, failover and rebalancing
 
----
-
 ## 🚀 Prerequisites
 
 To build and run this project locally, ensure you have the following installed:

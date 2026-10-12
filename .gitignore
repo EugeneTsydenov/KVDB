@@ -22,3 +22,5 @@ mem.pprof
 # OS generated
 .DS_Store
 Thumbs.db
+
+report.xml

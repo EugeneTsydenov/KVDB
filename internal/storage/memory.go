@@ -29,7 +29,7 @@ func (s *MemoryStore) Set(key string, v Value) {
 	defer s.mu.Unlock()
 
 	s.entries[key] = Entry{
-		Value: v,
+		Value: v.Clone(),
 	}
 }
 
@@ -43,7 +43,7 @@ func (s *MemoryStore) SetNX(key string, v Value) bool {
 	}
 
 	s.entries[key] = Entry{
-		Value: v,
+		Value: v.Clone(),
 	}
 
 	return true
@@ -74,7 +74,7 @@ func (s *MemoryStore) Get(key string) (Value, error) {
 
 	s.mu.RUnlock()
 
-	return entry.Value, nil
+	return entry.Value.Clone(), nil
 }
 
 // Del removes a key.

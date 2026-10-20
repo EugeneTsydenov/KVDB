@@ -166,8 +166,14 @@ func (s *MemoryStore) Del(key string) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	now := time.Now()
-	if entry, ok := s.entries[key]; !ok && entry.IsExpired(now) {
+	entry, ok := s.entries[key]
+	if !ok {
+		return false
+	}
+
+	if entry.IsExpired(time.Now()) {
+		delete(s.entries, key)
+
 		return false
 	}
 

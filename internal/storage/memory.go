@@ -8,7 +8,11 @@ import (
 
 var _ Storage = (*MemoryStore)(nil)
 
-var ErrEntryNotFound = errors.New("entry not found")
+var (
+	ErrEntryNotFound = errors.New("entry not found")
+	ErrTTLInvalid    = errors.New("ttl invalid")
+	ErrKeyNoTTL      = errors.New("key has no expiration")
+)
 
 // MemoryStore is an in-memory implementation of the Storage interface.
 type MemoryStore struct {
@@ -49,6 +53,23 @@ func (s *MemoryStore) SetNX(key string, v Value) bool {
 	return true
 }
 
+// Set stores a value with ttl.
+func (s *MemoryStore) SetEX(key string, v Value, ttl time.Duration) error {
+	if ttl <= 0 {
+		return ErrTTLInvalid
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.entries[key] = Entry{
+		Value:     v.Clone(),
+		ExpiresAt: time.Now().Add(ttl),
+	}
+
+	return nil
+}
+
 // Get retrieves a value and cleans up expired entries lazily.
 func (s *MemoryStore) Get(key string) (Value, error) {
 	s.mu.RLock()
@@ -61,20 +82,83 @@ func (s *MemoryStore) Get(key string) (Value, error) {
 		return Value{}, ErrEntryNotFound
 	}
 
-	if entry.IsExpired(now) {
+	if !entry.IsExpired(now) {
+		val := entry.Value.Clone()
 		s.mu.RUnlock()
-		s.mu.Lock()
-		if e, exists := s.entries[key]; exists && e.IsExpired(now) {
-			delete(s.entries, key)
-		}
-		s.mu.Unlock()
 
-		return Value{}, ErrEntryNotFound
+		return val, nil
 	}
-
 	s.mu.RUnlock()
 
-	return entry.Value.Clone(), nil
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if entry, exists := s.entries[key]; exists && entry.IsExpired(now) {
+		delete(s.entries, key)
+	}
+
+	return Value{}, ErrEntryNotFound
+}
+
+// TTL returns the remaining ttl for a key.
+func (s *MemoryStore) TTL(key string) (time.Duration, error) {
+	s.mu.RLock()
+	entry, ok := s.entries[key]
+	now := time.Now()
+
+	if !ok {
+		s.mu.RUnlock()
+
+		return 0, ErrEntryNotFound
+	}
+
+	if !entry.IsExpired(now) {
+		s.mu.RUnlock()
+		if entry.ExpiresAt.IsZero() {
+			return 0, ErrKeyNoTTL
+		}
+
+		return time.Until(entry.ExpiresAt), nil
+	}
+	s.mu.RUnlock()
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if entry, exists := s.entries[key]; exists && entry.IsExpired(now) {
+		delete(s.entries, key)
+	}
+
+	return 0, ErrEntryNotFound
+}
+
+// Expire sets or updates ttl for an existing key.
+func (s *MemoryStore) Expire(key string, ttl time.Duration) error {
+	if ttl <= 0 {
+		return ErrTTLInvalid
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	entry, ok := s.entries[key]
+	now := time.Now()
+	if !ok {
+		return ErrEntryNotFound
+	}
+
+	if entry.IsExpired(now) {
+		delete(s.entries, key)
+
+		return ErrEntryNotFound
+	}
+
+	s.entries[key] = Entry{
+		Value:     entry.Value.Clone(),
+		ExpiresAt: now.Add(ttl),
+	}
+
+	return nil
 }
 
 // Del removes a key.
@@ -82,7 +166,14 @@ func (s *MemoryStore) Del(key string) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	if _, ok := s.entries[key]; !ok {
+	entry, ok := s.entries[key]
+	if !ok {
+		return false
+	}
+
+	if entry.IsExpired(time.Now()) {
+		delete(s.entries, key)
+
 		return false
 	}
 

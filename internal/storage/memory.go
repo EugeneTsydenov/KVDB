@@ -49,6 +49,17 @@ func (s *MemoryStore) SetNX(key string, v Value) bool {
 	return true
 }
 
+// Set stores a value with ttl.
+func (s *MemoryStore) SetEX(key string, v Value, ttl time.Duration) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.entries[key] = Entry{
+		Value:     v.Clone(),
+		ExpiresAt: time.Now().UTC().Add(ttl),
+	}
+}
+
 // Get retrieves a value and cleans up expired entries lazily.
 func (s *MemoryStore) Get(key string) (Value, error) {
 	s.mu.RLock()

@@ -181,3 +181,26 @@ func (s *MemoryStore) Del(key string) bool {
 
 	return true
 }
+
+func (s *MemoryStore) DeleteExpiredBatch(sampleSize int) int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	now := time.Now()
+	deleted := 0
+	cnt := 0
+
+	for k, v := range s.entries {
+		if cnt >= sampleSize {
+			break
+		}
+		cnt++
+
+		if v.IsExpired(now) {
+			delete(s.entries, k)
+			deleted++
+		}
+	}
+
+	return deleted
+}

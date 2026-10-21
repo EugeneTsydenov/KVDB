@@ -6,8 +6,6 @@ import (
 	"time"
 )
 
-var _ Storage = (*MemoryStore)(nil)
-
 var (
 	ErrEntryNotFound = errors.New("entry not found")
 	ErrTTLInvalid    = errors.New("ttl invalid")

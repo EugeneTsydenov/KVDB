@@ -2,14 +2,17 @@ package storage
 
 import (
 	"errors"
+	"fmt"
+	"regexp"
 	"sync"
 	"time"
 )
 
 var (
-	ErrEntryNotFound = errors.New("entry not found")
-	ErrTTLInvalid    = errors.New("ttl invalid")
-	ErrKeyNoTTL      = errors.New("key has no expiration")
+	ErrEntryNotFound  = errors.New("entry not found")
+	ErrTTLInvalid     = errors.New("ttl invalid")
+	ErrKeyNoTTL       = errors.New("key has no expiration")
+	ErrInvalidPattern = errors.New("invalid pattern")
 )
 
 // MemoryStore is an in-memory implementation of the Storage interface.
@@ -157,6 +160,34 @@ func (s *MemoryStore) Expire(key string, ttl time.Duration) error {
 	}
 
 	return nil
+}
+
+// Keys retrieves keys matching the regexp pattern. Returns ErrInvalidPattern if pattern is invalid.
+func (s *MemoryStore) Keys(pattern string) ([]string, error) {
+	regex, err := regexp.Compile(pattern)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %w", ErrInvalidPattern, err)
+	}
+
+	now := time.Now()
+
+	s.mu.RLock()
+	keysSnapshot := make([]string, 0, len(s.entries))
+	for k, entry := range s.entries {
+		if !entry.IsExpired(now) {
+			keysSnapshot = append(keysSnapshot, k)
+		}
+	}
+	s.mu.RUnlock()
+
+	keys := make([]string, 0, len(keysSnapshot))
+	for _, k := range keysSnapshot {
+		if regex.MatchString(k) {
+			keys = append(keys, k)
+		}
+	}
+
+	return keys, nil
 }
 
 // Del removes a key.

@@ -47,12 +47,12 @@ func TestWorker_ConcurrentGetSetAndCleanup(t *testing.T) {
 
 	store := storage.NewMemoryStore()
 
-	if err := store.SetEX(
+	if err := store.Set(
 		"cleanup-seed",
 		storage.NewStringValue([]byte("old")),
 		2*time.Millisecond,
 	); err != nil {
-		t.Fatalf("SetEX cleanup-seed: %v", err)
+		t.Fatalf("Set cleanup-seed: %v", err)
 	}
 
 	deleter := &recordingBatchDeleter{
@@ -93,7 +93,7 @@ func TestWorker_ConcurrentGetSetAndCleanup(t *testing.T) {
 					[]byte(fmt.Sprintf("worker-%d-value-%d", id, i)),
 				)
 
-				store.Set(key, value)
+				store.Set(key, value, 0)
 
 				got, err := store.Get(key)
 				if err != nil {
@@ -115,7 +115,7 @@ func TestWorker_ConcurrentGetSetAndCleanup(t *testing.T) {
 					)
 				}
 
-				store.Set("shared", value)
+				store.Set("shared", value, 0)
 
 				got, err = store.Get("shared")
 				if err != nil {
@@ -134,13 +134,13 @@ func TestWorker_ConcurrentGetSetAndCleanup(t *testing.T) {
 					)
 				}
 
-				if err := store.SetEX(
+				if err := store.Set(
 					expiringKey,
 					value,
 					time.Millisecond,
 				); err != nil {
 					t.Errorf(
-						"worker %d: SetEX(%q): %v",
+						"worker %d: Set(%q): %v",
 						id,
 						expiringKey,
 						err,

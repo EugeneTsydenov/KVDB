@@ -6,29 +6,29 @@ import (
 	"time"
 )
 
-func TestMemoryStore_SetEX(t *testing.T) {
+func TestMemoryStore_SetTTL(t *testing.T) {
 	t.Parallel()
 
 	store := NewMemoryStore()
 
 	ttl := time.Minute
 
-	if err := store.SetEX(
+	if err := store.Set(
 		"key",
 		NewStringValue([]byte("first")),
 		ttl,
 	); err != nil {
-		t.Fatalf("SetEX: unexpected error: %v", err)
+		t.Fatalf("Set: unexpected error: %v", err)
 	}
 
 	checkValue(t, store, "key", "first")
 
-	if err := store.SetEX(
+	if err := store.Set(
 		"key",
 		NewStringValue([]byte("second")),
 		ttl,
 	); err != nil {
-		t.Fatalf("SetEX overwrite: unexpected error: %v", err)
+		t.Fatalf("Set overwrite: unexpected error: %v", err)
 	}
 
 	checkValue(t, store, "key", "second")
@@ -43,25 +43,26 @@ func TestMemoryStore_SetEX(t *testing.T) {
 	}
 }
 
-func TestMemoryStore_SetEX_InvalidTTL(t *testing.T) {
+func TestMemoryStore_Set_InvalidTTL(t *testing.T) {
 	t.Parallel()
 
 	store := NewMemoryStore()
-	store.Set("key", NewStringValue([]byte("original")))
+	if err := store.Set("key", NewStringValue([]byte("original")), 0); err != nil {
+		t.Fatalf("Set: unexpected error: %v", err)
+	}
 
 	invalidTTLs := []time.Duration{
-		0,
 		-time.Second,
 	}
 
 	for _, ttl := range invalidTTLs {
-		if err := store.SetEX(
+		if err := store.Set(
 			"key",
 			NewStringValue([]byte("replacement")),
 			ttl,
 		); !errors.Is(err, ErrTTLInvalid) {
 			t.Errorf(
-				"SetEX with ttl %v: got error %v, want ErrTTLInvalid",
+				"Set with ttl %v: got error %v, want ErrTTLInvalid",
 				ttl,
 				err,
 			)
@@ -76,7 +77,9 @@ func TestMemoryStore_Expire(t *testing.T) {
 
 	store := NewMemoryStore()
 
-	store.Set("key", NewStringValue([]byte("value")))
+	if err := store.Set("key", NewStringValue([]byte("value")), 0); err != nil {
+		t.Fatalf("Set: unexpected error: %v", err)
+	}
 
 	ttl := time.Minute
 
@@ -136,7 +139,9 @@ func TestMemoryStore_TTL(t *testing.T) {
 		)
 	}
 
-	store.Set("permanent", NewStringValue([]byte("value")))
+	if err := store.Set("permanent", NewStringValue([]byte("value")), 0); err != nil {
+		t.Fatalf("Set: unexpected error: %v", err)
+	}
 
 	if _, err := store.TTL("permanent"); !errors.Is(err, ErrKeyNoTTL) {
 		t.Errorf(
@@ -147,12 +152,12 @@ func TestMemoryStore_TTL(t *testing.T) {
 
 	ttl := time.Minute
 
-	if err := store.SetEX(
+	if err := store.Set(
 		"expiring",
 		NewStringValue([]byte("value")),
 		ttl,
 	); err != nil {
-		t.Fatalf("SetEX: unexpected error: %v", err)
+		t.Fatalf("Set: unexpected error: %v", err)
 	}
 
 	gotTTL, err := store.TTL("expiring")
@@ -218,12 +223,12 @@ func TestMemoryStore_DeleteExpiredBatch(t *testing.T) {
 		ExpiresAt: time.Now().Add(-time.Second),
 	}
 
-	if err := store.SetEX(
+	if err := store.Set(
 		"valid",
 		NewStringValue([]byte("value")),
 		time.Hour,
 	); err != nil {
-		t.Fatalf("SetEX: unexpected error: %v", err)
+		t.Fatalf("Set: unexpected error: %v", err)
 	}
 
 	deleted := store.DeleteExpiredBatch(100)

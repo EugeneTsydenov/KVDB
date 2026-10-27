@@ -29,39 +29,21 @@ func NewMemoryStore() *MemoryStore {
 }
 
 // Set stores a value.
-func (s *MemoryStore) Set(key string, v Value) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	s.entries[key] = Entry{
-		Value: v.Clone(),
-	}
-}
-
-// SetNX stores a value if it doesn't exist or has expired.
-func (s *MemoryStore) SetNX(key string, v Value) bool {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	if entry, ok := s.entries[key]; ok && !entry.IsExpired(time.Now()) {
-		return false
-	}
-
-	s.entries[key] = Entry{
-		Value: v.Clone(),
-	}
-
-	return true
-}
-
-// Set stores a value with ttl.
-func (s *MemoryStore) SetEX(key string, v Value, ttl time.Duration) error {
-	if ttl <= 0 {
+func (s *MemoryStore) Set(key string, v Value, ttl time.Duration) error {
+	if ttl < 0 {
 		return ErrTTLInvalid
 	}
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
+
+	if ttl == 0 {
+		s.entries[key] = Entry{
+			Value: v.Clone(),
+		}
+
+		return nil
+	}
 
 	s.entries[key] = Entry{
 		Value:     v.Clone(),
@@ -69,6 +51,35 @@ func (s *MemoryStore) SetEX(key string, v Value, ttl time.Duration) error {
 	}
 
 	return nil
+}
+
+// SetNX stores a value if it doesn't exist or has expired.
+func (s *MemoryStore) SetNX(key string, v Value, ttl time.Duration) (bool, error) {
+	if ttl < 0 {
+		return false, ErrTTLInvalid
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if entry, ok := s.entries[key]; ok && !entry.IsExpired(time.Now()) {
+		return false, nil
+	}
+
+	if ttl == 0 {
+		s.entries[key] = Entry{
+			Value: v.Clone(),
+		}
+
+		return true, nil
+	}
+
+	s.entries[key] = Entry{
+		Value:     v.Clone(),
+		ExpiresAt: time.Now().Add(ttl),
+	}
+
+	return true, nil
 }
 
 // Get retrieves a value and cleans up expired entries lazily.

@@ -55,7 +55,7 @@ func (s *MemoryStore) Set(key string, v Value, ttl time.Duration) error {
 
 // SetNX stores a value if it doesn't exist or has expired.
 func (s *MemoryStore) SetNX(key string, v Value, ttl time.Duration) (bool, error) {
-	if ttl > 0 {
+	if ttl < 0 {
 		return false, ErrTTLInvalid
 	}
 

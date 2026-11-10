@@ -3,28 +3,28 @@ package protocol
 import "errors"
 
 var (
-	// ErrBadMagic: the packet does not start with the protocol magic.
+	// ErrBadMagic means the first two bytes are not the KVDB magic.
 	ErrBadMagic = errors.New("bad magic")
-	// ErrUnsupportedVersion: the protocol version is not supported.
+	// ErrUnsupportedVersion means the packet uses a version we do not support.
 	ErrUnsupportedVersion = errors.New("unsupported version")
-	// ErrBadLength: framing error. The datagram is shorter than the header,
-	// longer than MaxPacketSize, or payload_len does not match its real size.
+	// ErrBadLength means the packet size or its payload length is wrong.
 	ErrBadLength = errors.New("bad length")
-	// ErrBadFlags: unknown flag bits, or flags do not match the packet direction.
+	// ErrBadFlags means the flags are wrong for a request or response.
 	ErrBadFlags = errors.New("bad flags")
-	// ErrTruncated: the payload ends before the current field is complete.
+	// ErrTruncated means there are not enough bytes to read a field.
 	ErrTruncated = errors.New("truncated")
-	// ErrTrailingBytes: unread bytes remain after the last payload field.
+	// ErrTrailingBytes means extra bytes remain after all fields are read.
 	ErrTrailingBytes = errors.New("trailing bytes")
-	// ErrUnknownOpCode: the operation code is not defined.
+	// ErrUnknownOpCode means the command code is not known.
 	ErrUnknownOpCode = errors.New("unknown operation code")
-	// ErrTooLarge: a key, value, pattern or message exceeds its limit.
+	// ErrTooLarge means a field or the whole packet is too large.
 	ErrTooLarge = errors.New("too large")
-	// ErrInvalidArgument: a field is well-formed but its value is not allowed.
+	// ErrInvalidArgument means a field has a value that is not allowed.
 	ErrInvalidArgument = errors.New("invalid argument")
 )
 
-// StatusOf maps a decoding error to the status sent back to the client.
+// StatusOf returns the response status for err.
+// It returns OK for nil and INTERNAL_ERROR for an unknown error.
 func StatusOf(err error) Status {
 	switch {
 	case err == nil:
@@ -48,8 +48,8 @@ func StatusOf(err error) Status {
 	}
 }
 
-// ShouldReply reports whether the server must answer a packet that failed
-// with err. Packets with a bad magic or a framing error are dropped silently.
+// ShouldReply returns false for bad magic or a wrong packet length.
+// It returns true for all other errors and for nil.
 func ShouldReply(err error) bool {
 	return !errors.Is(err, ErrBadMagic) && !errors.Is(err, ErrBadLength)
 }

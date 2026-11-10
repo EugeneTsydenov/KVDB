@@ -2,7 +2,7 @@ package protocol
 
 import "fmt"
 
-// Status is a response status code. Its value is exactly the byte sent on the wire.
+// Status is the one-byte result code in a response.
 type Status uint8
 
 const (
@@ -17,7 +17,7 @@ const (
 	StatusInternalError      Status = 0x7F
 )
 
-// Valid reports whether the status is known.
+// Valid returns true if the status code is known. Otherwise, it returns false.
 func (s Status) Valid() bool {
 	switch s {
 	case StatusOK,
@@ -35,6 +35,8 @@ func (s Status) Valid() bool {
 	}
 }
 
+// String returns the status name, or a name like "Status(0xFF)" for an unknown code.
+//
 //nolint:cyclop
 func (s Status) String() string {
 	switch s {

@@ -5,28 +5,29 @@ import (
 	"math"
 )
 
-// Appends a single byte.
+// appendU8 adds one byte to b and returns the new slice.
 func appendU8(b []byte, v uint8) []byte {
 	return append(b, v)
 }
 
-// Appends a 2-byte unsigned integer in big-endian order.
+// appendU16 adds v to b as 2 bytes and returns the new slice.
 func appendU16(b []byte, v uint16) []byte {
 	return binary.BigEndian.AppendUint16(b, v)
 }
 
-// Appends an 8-byte unsigned integer in big-endian order.
+// appendU64 adds v to b as 8 bytes and returns the new slice.
 func appendU64(b []byte, v uint64) []byte {
 	return binary.BigEndian.AppendUint64(b, v)
 }
 
-// Appends an 8-byte signed integer in big-endian order.
+// appendI64 adds v to b as 8 bytes and returns the new slice.
+// v can be negative.
 func appendI64(b []byte, v int64) []byte {
 	return binary.BigEndian.AppendUint64(b, uint64(v))
 }
 
-// Appends the data length as a u16, followed by the data.
-// Returns ErrTooLarge if the data exceeds the maximum u16 length.
+// appendBytes adds a 2-byte length and the data to b, then returns the new slice.
+// If data is longer than 65535 bytes, it returns b unchanged and ErrTooLarge.
 func appendBytes(b []byte, data []byte) ([]byte, error) {
 	if len(data) > math.MaxUint16 {
 		return b, ErrTooLarge
@@ -37,7 +38,8 @@ func appendBytes(b []byte, data []byte) ([]byte, error) {
 	return append(b, data...), nil
 }
 
-// Appends a string in the same format as appendBytes.
+// appendString adds a 2-byte length and the string bytes to b, then returns the new slice.
+// If the string is longer than 65535 bytes, it returns b unchanged and ErrTooLarge.
 func appendString(b []byte, s string) ([]byte, error) {
 	if len(s) > math.MaxUint16 {
 		return b, ErrTooLarge

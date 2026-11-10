@@ -2,23 +2,24 @@ package protocol
 
 import "encoding/binary"
 
-// Reads values from a buffer one by one.
+// reader holds packet bytes and the next position to read.
 type reader struct {
 	buf []byte
 	pos int
 }
 
+// newReader returns a reader that starts at the first byte of buf.
 func newReader(buf []byte) *reader {
 	return &reader{buf: buf}
 }
 
-// Returns the number of unread bytes.
+// remaining returns the number of bytes left to read.
 func (r *reader) remaining() int {
 	return len(r.buf) - r.pos
 }
 
-// Reads the next n bytes and moves the position forward.
-// Returns ErrTruncated if there are not enough bytes.
+// take returns the next n bytes and moves past them.
+// It returns ErrTruncated if n is negative or there are not enough bytes.
 func (r *reader) take(n int) ([]byte, error) {
 	if n < 0 || r.remaining() < n {
 		return nil, ErrTruncated
@@ -30,7 +31,8 @@ func (r *reader) take(n int) ([]byte, error) {
 	return data, nil
 }
 
-// Reads a single byte.
+// u8 reads and returns the next byte.
+// It returns ErrTruncated if there are no bytes left.
 func (r *reader) u8() (uint8, error) {
 	data, err := r.take(1)
 	if err != nil {
@@ -40,7 +42,8 @@ func (r *reader) u8() (uint8, error) {
 	return data[0], nil
 }
 
-// Reads a 2-byte unsigned integer in big-endian order.
+// u16 reads the next 2 bytes and returns a uint16.
+// It returns ErrTruncated if there are not enough bytes.
 func (r *reader) u16() (uint16, error) {
 	//nolint: mnd
 	data, err := r.take(2)
@@ -51,7 +54,8 @@ func (r *reader) u16() (uint16, error) {
 	return binary.BigEndian.Uint16(data), nil
 }
 
-// Reads an 8-byte unsigned integer in big-endian order.
+// u64 reads the next 8 bytes and returns a uint64.
+// It returns ErrTruncated if there are not enough bytes.
 func (r *reader) u64() (uint64, error) {
 	//nolint: mnd
 	data, err := r.take(8)
@@ -62,17 +66,18 @@ func (r *reader) u64() (uint64, error) {
 	return binary.BigEndian.Uint64(data), nil
 }
 
-// Reads an 8-byte signed integer.
+// i64 reads the next 8 bytes and returns an int64, which can be negative.
+// It returns ErrTruncated if there are not enough bytes.
 func (r *reader) i64() (int64, error) {
 	v, err := r.u64()
 
 	return int64(v), err
 }
 
-// Reads a u16 length followed by the data.
-// Returns ErrTooLarge if the length exceeds maxLen.
-// Returns ErrTruncated if the buffer does not contain all the data.
-// On error, the position stays unchanged.
+// bytes reads a 2-byte length, then returns that many bytes.
+// The returned slice shares the input buffer.
+// It returns ErrTooLarge if the length is above maxLen.
+// It returns ErrTruncated if bytes are missing. On error, it does not move.
 func (r *reader) bytes(maxLen int) ([]byte, error) {
 	start := r.pos
 
@@ -97,7 +102,8 @@ func (r *reader) bytes(maxLen int) ([]byte, error) {
 	return data, nil
 }
 
-// Reads a string using the same format as bytes.
+// str reads a 2-byte length, then returns that many bytes as a string.
+// It returns the same errors as bytes.
 func (r *reader) str(maxLen int) (string, error) {
 	data, err := r.bytes(maxLen)
 	if err != nil {
@@ -107,7 +113,8 @@ func (r *reader) str(maxLen int) (string, error) {
 	return string(data), nil
 }
 
-// Checks that all bytes have been read.
+// finish returns nil if all bytes have been read.
+// It returns ErrTrailingBytes if any bytes are left.
 func (r *reader) finish() error {
 	if r.remaining() != 0 {
 		return ErrTrailingBytes

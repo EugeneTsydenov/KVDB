@@ -2,7 +2,7 @@ package protocol
 
 import "fmt"
 
-// OpCode is a command code. Its value is exactly the byte sent on the wire.
+// OpCode is the one-byte code for a command, such as GET or SET.
 type OpCode uint8
 
 const (
@@ -16,7 +16,7 @@ const (
 	OpKeys   OpCode = 0x08
 )
 
-// Valid reports whether the code is a known command.
+// Valid returns true if the command code is known. Otherwise, it returns false.
 func (o OpCode) Valid() bool {
 	switch o {
 	case OpPing, OpGet, OpSet, OpSetNX, OpDel, OpTTL, OpExpire, OpKeys:
@@ -26,6 +26,7 @@ func (o OpCode) Valid() bool {
 	}
 }
 
+// String returns the command name, or a name like "OpCode(0xFF)" for an unknown code.
 func (o OpCode) String() string {
 	switch o {
 	case OpPing:

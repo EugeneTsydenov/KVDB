@@ -31,17 +31,6 @@ func (r *reader) take(n int) ([]byte, error) {
 	return data, nil
 }
 
-// u8 reads and returns the next byte.
-// It returns ErrTruncated if there are no bytes left.
-func (r *reader) u8() (uint8, error) {
-	data, err := r.take(1)
-	if err != nil {
-		return 0, err
-	}
-
-	return data[0], nil
-}
-
 // u16 reads the next 2 bytes and returns a uint16.
 // It returns ErrTruncated if there are not enough bytes.
 func (r *reader) u16() (uint16, error) {

@@ -149,6 +149,8 @@ func validateKey(key []byte) error {
 
 // encodePayload returns the command fields as bytes, without a header.
 // It returns an error if the command is unknown or a field cannot be written.
+//
+//nolint:cyclop
 func (req Request) encodePayload() ([]byte, error) {
 	var payload []byte
 	var err error

@@ -2,6 +2,8 @@ package storage
 
 import (
 	"errors"
+	"reflect"
+	"sort"
 	"testing"
 	"time"
 )
@@ -85,5 +87,143 @@ func TestMemoryStore_Del(t *testing.T) {
 	}
 	if ok := store.Del("key"); ok {
 		t.Fatal("Del on missing key returned true")
+	}
+}
+
+func assertKeysEqual(t *testing.T, got, want []string) {
+	t.Helper()
+
+	got = append([]string(nil), got...)
+	want = append([]string(nil), want...)
+
+	sort.Strings(got)
+	sort.Strings(want)
+
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("Keys returned %v, want %v", got, want)
+	}
+}
+
+func setPermanentKeyForKeysTest(
+	t *testing.T,
+	store *MemoryStore,
+	key string,
+) {
+	t.Helper()
+
+	if err := store.Set(
+		key,
+		NewStringValue([]byte("value")),
+		0,
+	); err != nil {
+		t.Fatalf("Set(%q): unexpected error: %v", key, err)
+	}
+}
+
+func TestMemoryStore_Keys_MatchesPattern(t *testing.T) {
+	t.Parallel()
+
+	store := NewMemoryStore()
+
+	for _, key := range []string{
+		"user:1",
+		"user:2",
+		"user:abc",
+		"prefix-user:3",
+		"session:1",
+	} {
+		setPermanentKeyForKeysTest(t, store, key)
+	}
+
+	store.entries["user:3"] = Entry{
+		Value:     NewStringValue([]byte("expired")),
+		ExpiresAt: time.Now().Add(-time.Second),
+	}
+
+	got, err := store.Keys(`^user:[0-9]+$`)
+	if err != nil {
+		t.Fatalf("Keys: unexpected error: %v", err)
+	}
+
+	assertKeysEqual(t, got, []string{
+		"user:1",
+		"user:2",
+	})
+}
+
+func TestMemoryStore_Keys_EmptyPattern(t *testing.T) {
+	t.Parallel()
+
+	store := NewMemoryStore()
+
+	setPermanentKeyForKeysTest(t, store, "")
+	setPermanentKeyForKeysTest(t, store, "alpha")
+	setPermanentKeyForKeysTest(t, store, "beta")
+
+	store.entries["expired"] = Entry{
+		Value:     NewStringValue([]byte("old")),
+		ExpiresAt: time.Now().Add(-time.Second),
+	}
+
+	got, err := store.Keys("")
+	if err != nil {
+		t.Fatalf("Keys with empty pattern: unexpected error: %v", err)
+	}
+
+	assertKeysEqual(t, got, []string{
+		"",
+		"alpha",
+		"beta",
+	})
+}
+
+func TestMemoryStore_Keys_InvalidPattern(t *testing.T) {
+	t.Parallel()
+
+	store := NewMemoryStore()
+	setPermanentKeyForKeysTest(t, store, "alpha")
+
+	got, err := store.Keys("[")
+	if !errors.Is(err, ErrInvalidPattern) {
+		t.Fatalf(
+			"Keys with invalid pattern: got error %v, want ErrInvalidPattern",
+			err,
+		)
+	}
+
+	if len(got) != 0 {
+		t.Errorf("Keys with invalid pattern returned %v, want no keys", got)
+	}
+}
+
+func TestMemoryStore_Keys_NoMatches(t *testing.T) {
+	t.Parallel()
+
+	store := NewMemoryStore()
+	setPermanentKeyForKeysTest(t, store, "user:1")
+	setPermanentKeyForKeysTest(t, store, "session:1")
+
+	got, err := store.Keys(`^missing:[0-9]+$`)
+	if err != nil {
+		t.Fatalf("Keys: unexpected error: %v", err)
+	}
+
+	if len(got) != 0 {
+		t.Errorf("Keys returned %v, want no matches", got)
+	}
+}
+
+func TestMemoryStore_Keys_EmptyStore(t *testing.T) {
+	t.Parallel()
+
+	store := NewMemoryStore()
+
+	got, err := store.Keys(".*")
+	if err != nil {
+		t.Fatalf("Keys on empty store: unexpected error: %v", err)
+	}
+
+	if len(got) != 0 {
+		t.Errorf("Keys on empty store returned %v, want no keys", got)
 	}
 }

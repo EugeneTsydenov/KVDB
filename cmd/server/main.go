@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
-	"kvdb/internal/handler"
-	"kvdb/internal/server"
-	"kvdb/internal/storage"
 	"log"
 	"os/signal"
 	"syscall"
+
+	"kvdb/internal/handler"
+	"kvdb/internal/server"
+	"kvdb/internal/storage"
 )
 
 func main() {

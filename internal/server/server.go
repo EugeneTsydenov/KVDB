@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"kvdb/internal/protocol"
 	"log"
 	"net"
 	"sync"
+
+	"kvdb/internal/protocol"
 )
 
 type Handler interface {
@@ -71,6 +72,8 @@ func (s *Server) Serve(ctx context.Context) error {
 
 			continue
 		}
+
+		log.Printf("client request: %d %s", n, clientAddr.String())
 
 		resp, err := s.h.Handle(buf[:n])
 		if err != nil {

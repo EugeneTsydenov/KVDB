@@ -86,12 +86,17 @@ func (s *Server) Serve(ctx context.Context) error {
 			continue
 		}
 
-		if _, err := s.conn.WriteToUDP(resp, clientAddr); err != nil {
+		writeN, err := s.conn.WriteToUDP(resp, clientAddr)
+		if err != nil {
 			if errors.Is(err, net.ErrClosed) {
 				return nil
 			}
 
 			log.Printf("write udp: %v", err)
+		}
+
+		if writeN != len(resp) {
+			log.Printf("short UDP write: %d of %d bytes", writeN, len(resp))
 		}
 	}
 }

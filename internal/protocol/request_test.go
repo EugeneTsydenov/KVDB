@@ -198,13 +198,42 @@ func TestDecodeRequestMalformedPackets(t *testing.T) {
 		{name: "bad magic", packet: badMagic, want: ErrBadMagic},
 		{name: "unsupported version", packet: badVersion, want: ErrUnsupportedVersion},
 		{name: "payload length mismatch", packet: badLength, want: ErrBadLength},
-		{name: "request flags set", packet: packetForTest(OpPing, StatusOK, FlagResponse, nil), want: ErrBadFlags},
-		{name: "nonzero request status", packet: packetForTest(OpPing, StatusNotFound, 0, nil), want: ErrInvalidArgument},
+		{
+			name:   "request flags set",
+			packet: packetForTest(OpPing, StatusOK, FlagResponse, nil),
+			want:   ErrBadFlags,
+		},
+		{
+			name:   "nonzero request status",
+			packet: packetForTest(OpPing, StatusNotFound, 0, nil),
+			want:   ErrInvalidArgument,
+		},
 		{name: "unknown opcode", packet: packetForTest(OpCode(0xFF), StatusOK, 0, nil), want: ErrUnknownOpCode},
-		{name: "truncated key length", packet: packetForTest(OpGet, StatusOK, 0, []byte{0}), want: ErrTruncated},
-		{name: "trailing ping payload", packet: packetForTest(OpPing, StatusOK, 0, []byte{1}), want: ErrTrailingBytes},
-		{name: "truncated set ttl", packet: packetForTest(OpSet, StatusOK, 0, append(appendBytesForTest([]byte("key")), appendBytesForTest([]byte("value"))...)), want: ErrTruncated},
-		{name: "invalid keys regex", packet: packetForTest(OpKeys, StatusOK, 0, invalidRegexPayload), want: ErrInvalidArgument},
+		{
+			name:   "truncated key length",
+			packet: packetForTest(OpGet, StatusOK, 0, []byte{0}),
+			want:   ErrTruncated,
+		},
+		{
+			name:   "trailing ping payload",
+			packet: packetForTest(OpPing, StatusOK, 0, []byte{1}),
+			want:   ErrTrailingBytes,
+		},
+		{
+			name: "truncated set ttl",
+			packet: packetForTest(
+				OpSet,
+				StatusOK,
+				0,
+				append(appendBytesForTest([]byte("key")), appendBytesForTest([]byte("value"))...),
+			),
+			want: ErrTruncated,
+		},
+		{
+			name:   "invalid keys regex",
+			packet: packetForTest(OpKeys, StatusOK, 0, invalidRegexPayload),
+			want:   ErrInvalidArgument,
+		},
 	}
 
 	for _, tc := range cases {

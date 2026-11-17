@@ -2,10 +2,9 @@ package handler
 
 import (
 	"errors"
-	"time"
-
 	"kvdb/internal/protocol"
 	"kvdb/internal/storage"
+	"time"
 )
 
 // Store defines the storage operations required by Handler.
@@ -56,7 +55,7 @@ func (h *Handler) handleDecodeError(
 	}
 
 	header, err := protocol.DecodeHeader(packet)
-	if err != nil && !errors.Is(err, protocol.ErrUnsupportedVersion) {
+	if err != nil {
 		return nil, nil
 	}
 

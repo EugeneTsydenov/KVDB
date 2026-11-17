@@ -3,11 +3,11 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
+	"kvdb/internal/protocol"
 	"log"
 	"net"
 	"sync"
-
-	"kvdb/internal/protocol"
 )
 
 type Handler interface {
@@ -59,7 +59,11 @@ func (s *Server) Serve(ctx context.Context) error {
 	for {
 		n, clientAddr, err := s.conn.ReadFromUDP(buf)
 		if err != nil {
-			return err
+			if errors.Is(err, net.ErrClosed) {
+				return nil
+			}
+
+			return fmt.Errorf("read udp: %w", err)
 		}
 
 		if n > protocol.MaxPacketSize || n < protocol.HeaderSize {

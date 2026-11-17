@@ -1,6 +1,6 @@
 # Software Requirements Specification
 
-## KVDB — Distributed Key-Value Database
+## KVDB - Distributed Key-Value Database
 
 10 November 2026
 
@@ -162,13 +162,13 @@ KVDB uses a custom binary protocol over UDP. One datagram contains one request o
 
 Each packet starts with a 16-byte header:
 
-- `magic` — 2 bytes, value `0x4B56`.
-- `version` — 1 byte, currently `0x01`.
-- `opcode` — 1 byte, command type.
-- `status` — 1 byte, result status.
-- `flags` — 1 byte, request or response flag.
-- `payload_len` — 2 bytes, payload length.
-- `request_id` — 8 bytes, used to match a response to a request.
+- `magic` - 2 bytes, value `0x4B56`.
+- `version` - 1 byte, currently `0x01`.
+- `opcode` - 1 byte, command type.
+- `status` - 1 byte, result status.
+- `flags` - 1 byte, request or response flag.
+- `payload_len` - 2 bytes, payload length.
+- `request_id` - 8 bytes, used to match a response to a request.
 
 The lowest bit of `flags` is `0` for requests and `1` for responses. Other flag bits must be zero. The request status is always zero. A response keeps the request's command code and request ID.
 
@@ -187,14 +187,14 @@ Byte arrays have a two-byte length field followed by the data. Text strings use 
 
 ### 5.3. Supported command codes
 
-- `0x01` — `PING`.
-- `0x02` — `GET`.
-- `0x03` — `SET`.
-- `0x04` — `SETNX`.
-- `0x05` — `DEL`.
-- `0x06` — `TTL`.
-- `0x07` — `EXPIRE`.
-- `0x08` — `KEYS`.
+- `0x01` - `PING`.
+- `0x02` - `GET`.
+- `0x03` - `SET`.
+- `0x04` - `SETNX`.
+- `0x05` - `DEL`.
+- `0x06` - `TTL`.
+- `0x07` - `EXPIRE`.
+- `0x08` - `KEYS`.
 
 Commands for transactions, Lua scripts, and cluster management are not part of this protocol version yet.
 

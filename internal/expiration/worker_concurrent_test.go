@@ -4,11 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"kvdb/internal/storage"
 	"sync"
 	"testing"
 	"time"
-
-	"kvdb/internal/storage"
 )
 
 type recordingBatchDeleter struct {

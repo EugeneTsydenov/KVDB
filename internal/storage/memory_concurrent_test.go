@@ -22,7 +22,12 @@ func TestMemoryStore_ConcurrentAccess(t *testing.T) {
 				store.Set(ownKey, NewStringValue([]byte("value")), 0)
 				checkValue(t, store, ownKey, "value")
 
-				if ok, err := store.SetNX(ownKey, NewStringValue([]byte("other")), 0); err != nil || ok {
+				if ok, err := store.SetNX(
+					ownKey,
+					NewStringValue([]byte("other")),
+					0,
+				); err != nil ||
+					ok {
 					t.Fatal("SetNX overwrote an existing key")
 				}
 				if !store.Del(ownKey) {

@@ -1,6 +1,6 @@
 {
     "formatters": {
-        "enable": ["gofumpt", "golines"],
+        "enable": ["golines"],
         "exclusions": {
             "generated": "lax",
             "paths": ["third_party$", "builtin$", "examples$"]

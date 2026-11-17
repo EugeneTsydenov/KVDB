@@ -20,7 +20,7 @@ func TestDecodeHeader(t *testing.T) {
 	}
 	packet := original.appendTo(nil)
 
-	decoded, err := decodeHeader(packet)
+	decoded, err := DecodeHeader(packet)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,7 +34,7 @@ func TestDecodeHeader(t *testing.T) {
 		t.Fatal("request ID is not encoded in big-endian order")
 	}
 
-	if _, err := decodeHeader(make([]byte, MaxPacketSize+1)); !errors.Is(err, ErrBadLength) {
+	if _, err := DecodeHeader(make([]byte, MaxPacketSize+1)); !errors.Is(err, ErrBadLength) {
 		t.Fatalf("oversized packet: got %v, want ErrBadLength", err)
 	}
 }
@@ -86,8 +86,8 @@ func TestDecodeHeaderRejectsMalformedPackets(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			if _, err := decodeHeader(tc.packet); !errors.Is(err, tc.want) {
-				t.Fatalf("decodeHeader error = %v, want %v", err, tc.want)
+			if _, err := DecodeHeader(tc.packet); !errors.Is(err, tc.want) {
+				t.Fatalf("DecodeHeader error = %v, want %v", err, tc.want)
 			}
 		})
 	}

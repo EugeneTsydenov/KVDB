@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"net"
 	"sync"
@@ -59,7 +60,11 @@ func (s *Server) Serve(ctx context.Context) error {
 	for {
 		n, clientAddr, err := s.conn.ReadFromUDP(buf)
 		if err != nil {
-			return err
+			if errors.Is(err, net.ErrClosed) {
+				return nil
+			}
+
+			return fmt.Errorf("read udp: %w", err)
 		}
 
 		if n > protocol.MaxPacketSize || n < protocol.HeaderSize {
@@ -67,6 +72,8 @@ func (s *Server) Serve(ctx context.Context) error {
 
 			continue
 		}
+
+		log.Printf("client request: %d %s", n, clientAddr.String())
 
 		resp, err := s.h.Handle(buf[:n])
 		if err != nil {

@@ -68,7 +68,12 @@ func TestEncodeResponseBoundaries(t *testing.T) {
 	})
 
 	t.Run("ttl below minimum", func(t *testing.T) {
-		if _, err := EncodeResponse(Response{Op: OpTTL, Status: StatusOK, TTLMs: -2}); !errors.Is(err, ErrInvalidArgument) {
+		if _, err := EncodeResponse(
+			Response{Op: OpTTL, Status: StatusOK, TTLMs: -2},
+		); !errors.Is(
+			err,
+			ErrInvalidArgument,
+		) {
 			t.Fatalf("got %v, want ErrInvalidArgument", err)
 		}
 	})
@@ -80,7 +85,12 @@ func TestEncodeResponseBoundaries(t *testing.T) {
 	})
 
 	t.Run("ttl above maximum", func(t *testing.T) {
-		if _, err := EncodeResponse(Response{Op: OpTTL, Status: StatusOK, TTLMs: MaxTTLMs + 1}); !errors.Is(err, ErrInvalidArgument) {
+		if _, err := EncodeResponse(
+			Response{Op: OpTTL, Status: StatusOK, TTLMs: MaxTTLMs + 1},
+		); !errors.Is(
+			err,
+			ErrInvalidArgument,
+		) {
 			t.Fatalf("got %v, want ErrInvalidArgument", err)
 		}
 	})
@@ -92,7 +102,12 @@ func TestEncodeResponseBoundaries(t *testing.T) {
 	})
 
 	t.Run("deleted count too large", func(t *testing.T) {
-		if _, err := EncodeResponse(Response{Op: OpDel, Status: StatusOK, Deleted: 2}); !errors.Is(err, ErrInvalidArgument) {
+		if _, err := EncodeResponse(
+			Response{Op: OpDel, Status: StatusOK, Deleted: 2},
+		); !errors.Is(
+			err,
+			ErrInvalidArgument,
+		) {
 			t.Fatalf("got %v, want ErrInvalidArgument", err)
 		}
 	})
@@ -254,16 +269,32 @@ func TestDecodeResponseMalformedPackets(t *testing.T) {
 	}{
 		{name: "short header", packet: make([]byte, HeaderSize-1), want: ErrBadLength},
 		{name: "request flag", packet: packetForTest(OpPing, StatusOK, 0, nil), want: ErrBadFlags},
-		{name: "invalid status", packet: packetForTest(OpPing, Status(0xFF), FlagResponse, nil), want: ErrInvalidArgument},
+		{
+			name:   "invalid status",
+			packet: packetForTest(OpPing, Status(0xFF), FlagResponse, nil),
+			want:   ErrInvalidArgument,
+		},
 		{name: "truncated get value", packet: truncatedGet, want: ErrTruncated},
 		{name: "trailing ping payload", packet: trailingPing, want: ErrTrailingBytes},
 		{name: "truncated ttl", packet: truncatedTTL, want: ErrTruncated},
 		{name: "invalid deleted count", packet: invalidDeleted, want: ErrInvalidArgument},
 		{name: "invalid ttl", packet: invalidTTL, want: ErrInvalidArgument},
 		{name: "nonzero keys cursor", packet: invalidCursor, want: ErrInvalidArgument},
-		{name: "truncated keys item", packet: packetForTest(OpKeys, StatusOK, FlagResponse, truncatedKeyList), want: ErrTruncated},
-		{name: "keys item too large", packet: packetForTest(OpKeys, StatusOK, FlagResponse, oversizedKey), want: ErrTooLarge},
-		{name: "truncated error message", packet: packetForTest(OpGet, StatusBadRequest, FlagResponse, []byte{0}), want: ErrTruncated},
+		{
+			name:   "truncated keys item",
+			packet: packetForTest(OpKeys, StatusOK, FlagResponse, truncatedKeyList),
+			want:   ErrTruncated,
+		},
+		{
+			name:   "keys item too large",
+			packet: packetForTest(OpKeys, StatusOK, FlagResponse, oversizedKey),
+			want:   ErrTooLarge,
+		},
+		{
+			name:   "truncated error message",
+			packet: packetForTest(OpGet, StatusBadRequest, FlagResponse, []byte{0}),
+			want:   ErrTruncated,
+		},
 	}
 
 	for _, tc := range cases {

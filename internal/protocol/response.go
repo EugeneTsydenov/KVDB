@@ -58,7 +58,7 @@ func EncodeResponse(resp Response) ([]byte, error) {
 // It returns an error if the packet or its fields are wrong.
 // It copies the value, so the caller can reuse the input bytes.
 func DecodeResponse(packet []byte) (Response, error) {
-	header, err := decodeHeader(packet)
+	header, err := DecodeHeader(packet)
 	if err != nil {
 		return Response{}, err
 	}

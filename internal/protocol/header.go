@@ -23,9 +23,9 @@ func (h *Header) appendTo(b []byte) []byte {
 	return appendU64(b, h.RequestID)
 }
 
-// decodeHeader reads and returns the packet header.
+// DecodeHeader reads and returns the packet header.
 // It returns an error if the size, magic, version or payload length is wrong.
-func decodeHeader(packet []byte) (Header, error) {
+func DecodeHeader(packet []byte) (Header, error) {
 	if len(packet) < HeaderSize || len(packet) > MaxPacketSize {
 		return Header{}, ErrBadLength
 	}

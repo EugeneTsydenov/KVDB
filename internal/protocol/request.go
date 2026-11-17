@@ -57,7 +57,7 @@ func EncodeRequest(req Request) ([]byte, error) {
 // It returns an error if the packet or its fields are wrong.
 // It copies the key and value, so the caller can reuse the input bytes.
 func DecodeRequest(packet []byte) (Request, error) {
-	header, err := decodeHeader(packet)
+	header, err := DecodeHeader(packet)
 	if err != nil {
 		return Request{}, err
 	}

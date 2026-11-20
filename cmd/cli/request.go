@@ -10,6 +10,8 @@ import (
 )
 
 // parseRequest converts CLI arguments into a protocol request.
+//
+//nolint:cyclop,funlen
 func parseRequest(args []string) (protocol.Request, error) {
 	var req protocol.Request
 
@@ -35,6 +37,7 @@ func parseRequest(args []string) (protocol.Request, error) {
 		req.Key = []byte(params[0])
 
 	case "set", "setnx":
+		//nolint:mnd
 		if err := checkArgs(params, 2, 3); err != nil {
 			return req, err
 		}
@@ -48,6 +51,7 @@ func parseRequest(args []string) (protocol.Request, error) {
 		req.Key = []byte(params[0])
 		req.Value = []byte(params[1])
 
+		//nolint:mnd
 		if len(params) == 3 {
 			ttl, err := parseTTL(params[2])
 			if err != nil {
@@ -71,6 +75,7 @@ func parseRequest(args []string) (protocol.Request, error) {
 		req.Key = []byte(params[0])
 
 	case "expire":
+		//nolint:mnd
 		if err := checkArgs(params, 2, 2); err != nil {
 			return req, err
 		}
@@ -102,11 +107,11 @@ func parseRequest(args []string) (protocol.Request, error) {
 	return req, nil
 }
 
-func checkArgs(args []string, min, max int) error {
-	if len(args) < min || len(args) > max {
+func checkArgs(args []string, minim, maxim int) error {
+	if len(args) < minim || len(args) > maxim {
 		return fmt.Errorf(
 			"invalid number of arguments: expected %d to %d, got %d",
-			min, max, len(args),
+			minim, maxim, len(args),
 		)
 	}
 

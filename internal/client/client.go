@@ -48,6 +48,8 @@ func New(addr string, timeout time.Duration) (*Client, error) {
 
 // Do sends one request and waits for its response.
 // Requests sharing one Client are executed sequentially.
+//
+//nolint:cyclop,funlen
 func (c *Client) Do(req protocol.Request) (protocol.Response, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()

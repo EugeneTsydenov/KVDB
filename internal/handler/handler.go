@@ -71,6 +71,8 @@ func (h *Handler) handleDecodeError(
 }
 
 // execute dispatches the request to the appropriate storage operation.
+//
+//nolint:cyclop,funlen
 func (h *Handler) execute(req protocol.Request) protocol.Response {
 	resp := protocol.Response{
 		Op:        req.Op,

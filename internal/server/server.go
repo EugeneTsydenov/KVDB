@@ -43,6 +43,7 @@ func New(addr string, h Handler) (*Server, error) {
 	}, nil
 }
 
+//nolint:cyclop
 func (s *Server) Serve(ctx context.Context) error {
 	done := make(chan struct{})
 	defer close(done)

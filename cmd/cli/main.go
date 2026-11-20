@@ -80,6 +80,5 @@ Examples:
   kvdb set username Evgeny
   kvdb get username
   kvdb set session abc 60000
-  kvdb keys "^user"
-`)
+  kvdb keys "^user"`)
 }

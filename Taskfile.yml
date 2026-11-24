@@ -1,3 +1,4 @@
+
 version: '3'
 
 vars:
@@ -5,49 +6,80 @@ vars:
 
 tasks:
   default:
-    desc: "Show help and list available tasks"
+    desc: "Показать список доступных команд"
     cmds:
       - task --list
 
   test:
-    desc: "Run all unit tests with race detection"
+    desc: "Запустить все тесты с проверкой гонок"
     cmds:
       - go test -v -race ./...
 
   test:short:
-    desc: "Run quick tests without race detection"
+    desc: "Запустить быстрые тесты"
     cmds:
       - go test -short ./...
 
   test:cover:
-    desc: "Run tests and generate HTML coverage report"
+    desc: "Запустить тесты и создать HTML-отчёт о покрытии"
     cmds:
       - go test -coverprofile=coverage.out ./...
       - go tool cover -html=coverage.out -o coverage.html
       - echo "Coverage report saved to coverage.html"
 
   bench:
-    desc: "Run Go benchmarks"
+    desc: "Запустить Go-бенчмарки"
     cmds:
       - go test -bench=. -benchmem ./...
 
   lint:
-    desc: "Run golangci-lint for code quality check"
+    desc: "Проверить Go-код с помощью golangci-lint"
     cmds:
       - golangci-lint run ./...
 
   fmt:
-    desc: "Format code using gofmt and goimports"
+    desc: "Отформатировать Go-код"
     cmds:
       - golangci-lint fmt
 
   deps:
-    desc: "Download and tidy up Go module dependencies"
+    desc: "Загрузить и обновить Go-зависимости"
     cmds:
       - go mod download
       - go mod tidy
 
   clean:
-    desc: "Remove compiled binaries and temporary coverage files"
+    desc: "Удалить временные файлы"
     cmds:
       - rm -f coverage.out coverage.html
+
+  # Protobuf / Buf
+
+  proto:lint:
+    desc: "Проверить стиль Protobuf-схем"
+    cmds:
+      - buf lint
+
+  proto:format:
+    desc: "Отформатировать Protobuf-схемы"
+    cmds:
+      - buf format -w
+
+  proto:build:
+    desc: "Проверить компиляцию Protobuf-схем"
+    cmds:
+      - buf build
+
+  proto:generate:
+    desc: "Сгенерировать Go-код из Protobuf"
+    deps:
+      - proto:lint
+    cmds:
+      - buf generate
+
+  proto:push:
+    desc: "Опубликовать Protobuf-схемы в Buf Registry"
+    deps:
+      - proto:lint
+    cmds:
+      - buf push

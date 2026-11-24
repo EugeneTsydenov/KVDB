@@ -7,12 +7,11 @@
 package pb
 
 import (
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
-
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -103,6 +102,8 @@ const (
 	Status_STATUS_UNSUPPORTED_VERSION Status = 18
 	Status_STATUS_TOO_LARGE           Status = 19
 	Status_STATUS_INVALID_ARGUMENT    Status = 20
+	Status_STATUS_REQUEST_CONFLICT    Status = 21
+	Status_STATUS_SERVER_BUSY         Status = 22
 	Status_STATUS_INTERNAL_ERROR      Status = 127
 )
 
@@ -118,6 +119,8 @@ var (
 		18:  "STATUS_UNSUPPORTED_VERSION",
 		19:  "STATUS_TOO_LARGE",
 		20:  "STATUS_INVALID_ARGUMENT",
+		21:  "STATUS_REQUEST_CONFLICT",
+		22:  "STATUS_SERVER_BUSY",
 		127: "STATUS_INTERNAL_ERROR",
 	}
 	Status_value = map[string]int32{
@@ -130,6 +133,8 @@ var (
 		"STATUS_UNSUPPORTED_VERSION": 18,
 		"STATUS_TOO_LARGE":           19,
 		"STATUS_INVALID_ARGUMENT":    20,
+		"STATUS_REQUEST_CONFLICT":    21,
+		"STATUS_SERVER_BUSY":         22,
 		"STATUS_INTERNAL_ERROR":      127,
 	}
 )
@@ -574,7 +579,7 @@ const file_kvdb_proto_rawDesc = "" +
 	"\rOPERATION_DEL\x10\x05\x12\x11\n" +
 	"\rOPERATION_TTL\x10\x06\x12\x14\n" +
 	"\x10OPERATION_EXPIRE\x10\a\x12\x12\n" +
-	"\x0eOPERATION_KEYS\x10\b*\xfa\x01\n" +
+	"\x0eOPERATION_KEYS\x10\b*\xaf\x02\n" +
 	"\x06Status\x12\x16\n" +
 	"\x12STATUS_UNSPECIFIED\x10\x00\x12\r\n" +
 	"\tSTATUS_OK\x10\x01\x12\x14\n" +
@@ -584,7 +589,9 @@ const file_kvdb_proto_rawDesc = "" +
 	"\x15STATUS_UNKNOWN_OPCODE\x10\x11\x12\x1e\n" +
 	"\x1aSTATUS_UNSUPPORTED_VERSION\x10\x12\x12\x14\n" +
 	"\x10STATUS_TOO_LARGE\x10\x13\x12\x1b\n" +
-	"\x17STATUS_INVALID_ARGUMENT\x10\x14\x12\x19\n" +
+	"\x17STATUS_INVALID_ARGUMENT\x10\x14\x12\x1b\n" +
+	"\x17STATUS_REQUEST_CONFLICT\x10\x15\x12\x16\n" +
+	"\x12STATUS_SERVER_BUSY\x10\x16\x12\x19\n" +
 	"\x15STATUS_INTERNAL_ERROR\x10\x7fB\x1eZ\x1ckvdb/internal/protocol/pb;pbb\x06proto3"
 
 var (
@@ -599,19 +606,16 @@ func file_kvdb_proto_rawDescGZIP() []byte {
 	return file_kvdb_proto_rawDescData
 }
 
-var (
-	file_kvdb_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-	file_kvdb_proto_msgTypes  = make([]protoimpl.MessageInfo, 4)
-	file_kvdb_proto_goTypes   = []any{
-		Operation(0),     // 0: kvdb.v1.Operation
-		Status(0),        // 1: kvdb.v1.Status
-		(*Packet)(nil),   // 2: kvdb.v1.Packet
-		(*Request)(nil),  // 3: kvdb.v1.Request
-		(*Response)(nil), // 4: kvdb.v1.Response
-		(*Ack)(nil),      // 5: kvdb.v1.Ack
-	}
-)
-
+var file_kvdb_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_kvdb_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_kvdb_proto_goTypes = []any{
+	(Operation)(0),   // 0: kvdb.v1.Operation
+	(Status)(0),      // 1: kvdb.v1.Status
+	(*Packet)(nil),   // 2: kvdb.v1.Packet
+	(*Request)(nil),  // 3: kvdb.v1.Request
+	(*Response)(nil), // 4: kvdb.v1.Response
+	(*Ack)(nil),      // 5: kvdb.v1.Ack
+}
 var file_kvdb_proto_depIdxs = []int32{
 	0, // 0: kvdb.v1.Packet.op:type_name -> kvdb.v1.Operation
 	3, // 1: kvdb.v1.Packet.request:type_name -> kvdb.v1.Request

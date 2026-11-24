@@ -1,19 +1,24 @@
 package protocol
 
-import "fmt"
+import (
+	"fmt"
 
-// OpCode is the one-byte code for a command, such as GET or SET.
-type OpCode uint8
+	"kvdb/internal/protocol/pb"
+)
+
+// OpCode is code for a command, such as GET or SET.
+type OpCode int32
 
 const (
-	OpPing   OpCode = 0x01
-	OpGet    OpCode = 0x02
-	OpSet    OpCode = 0x03
-	OpSetNX  OpCode = 0x04
-	OpDel    OpCode = 0x05
-	OpTTL    OpCode = 0x06
-	OpExpire OpCode = 0x07
-	OpKeys   OpCode = 0x08
+	OpUnspecified OpCode = iota
+	OpPing
+	OpGet
+	OpSet
+	OpSetNX
+	OpDel
+	OpTTL
+	OpExpire
+	OpKeys
 )
 
 // Valid returns true if the command code is known. Otherwise, it returns false.
@@ -26,7 +31,7 @@ func (o OpCode) Valid() bool {
 	}
 }
 
-// String returns the command name, or a name like "OpCode(0xFF)" for an unknown code.
+// String returns the command name, or a name like "OpCode(1)" for an unknown code.
 func (o OpCode) String() string {
 	switch o {
 	case OpPing:
@@ -46,6 +51,33 @@ func (o OpCode) String() string {
 	case OpKeys:
 		return "KEYS"
 	default:
-		return fmt.Sprintf("OpCode(0x%02X)", uint8(o))
+		return fmt.Sprintf("OpCode(%d)", int(o))
+	}
+}
+
+func (o OpCode) ToPbOperation() pb.Operation {
+	return pb.Operation(o)
+}
+
+func OpCodeFromPb(op pb.Operation) (OpCode, error) {
+	switch op {
+	case pb.Operation_OPERATION_PING:
+		return OpPing, nil
+	case pb.Operation_OPERATION_GET:
+		return OpGet, nil
+	case pb.Operation_OPERATION_SET:
+		return OpSet, nil
+	case pb.Operation_OPERATION_SETNX:
+		return OpSetNX, nil
+	case pb.Operation_OPERATION_DEL:
+		return OpDel, nil
+	case pb.Operation_OPERATION_TTL:
+		return OpTTL, nil
+	case pb.Operation_OPERATION_EXPIRE:
+		return OpExpire, nil
+	case pb.Operation_OPERATION_KEYS:
+		return OpKeys, nil
+	default:
+		return 0, ErrUnknownOpcode
 	}
 }

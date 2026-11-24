@@ -27,13 +27,13 @@ func parseRequest(args []string) (protocol.Request, error) {
 		if err := checkArgs(params, 0, 0); err != nil {
 			return req, err
 		}
-		req.Op = protocol.OpPing
+		req.Header.Op = protocol.OpPing
 
 	case "get":
 		if err := checkArgs(params, 1, 1); err != nil {
 			return req, err
 		}
-		req.Op = protocol.OpGet
+		req.Header.Op = protocol.OpGet
 		req.Key = []byte(params[0])
 
 	case "set", "setnx":
@@ -43,9 +43,9 @@ func parseRequest(args []string) (protocol.Request, error) {
 		}
 
 		if command == "set" {
-			req.Op = protocol.OpSet
+			req.Header.Op = protocol.OpSet
 		} else {
-			req.Op = protocol.OpSetNX
+			req.Header.Op = protocol.OpSetNX
 		}
 
 		req.Key = []byte(params[0])
@@ -64,14 +64,14 @@ func parseRequest(args []string) (protocol.Request, error) {
 		if err := checkArgs(params, 1, 1); err != nil {
 			return req, err
 		}
-		req.Op = protocol.OpDel
+		req.Header.Op = protocol.OpDel
 		req.Key = []byte(params[0])
 
 	case "ttl":
 		if err := checkArgs(params, 1, 1); err != nil {
 			return req, err
 		}
-		req.Op = protocol.OpTTL
+		req.Header.Op = protocol.OpTTL
 		req.Key = []byte(params[0])
 
 	case "expire":
@@ -88,7 +88,7 @@ func parseRequest(args []string) (protocol.Request, error) {
 			return req, errors.New("EXPIRE requires a positive TTL")
 		}
 
-		req.Op = protocol.OpExpire
+		req.Header.Op = protocol.OpExpire
 		req.Key = []byte(params[0])
 		req.TTLMs = ttl
 
@@ -97,7 +97,7 @@ func parseRequest(args []string) (protocol.Request, error) {
 			return req, err
 		}
 
-		req.Op = protocol.OpKeys
+		req.Header.Op = protocol.OpKeys
 		req.Pattern = params[0]
 
 	default:

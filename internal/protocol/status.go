@@ -1,20 +1,27 @@
 package protocol
 
-import "fmt"
+import (
+	"fmt"
 
-// Status is the one-byte result code in a response.
-type Status uint8
+	"kvdb/internal/protocol/pb"
+)
+
+// Status is the result code in a response.
+type Status int32
 
 const (
-	StatusOK                 Status = 0x00
-	StatusNotFound           Status = 0x01
-	StatusNotSet             Status = 0x02
-	StatusBadRequest         Status = 0x10
-	StatusUnknownOpCode      Status = 0x11
-	StatusUnsupportedVersion Status = 0x12
-	StatusTooLarge           Status = 0x13
-	StatusInvalidArgument    Status = 0x14
-	StatusInternalError      Status = 0x7F
+	StatusUnspecified        Status = 0
+	StatusOK                 Status = 1
+	StatusNotFound           Status = 2
+	StatusNotSet             Status = 3
+	StatusBadRequest         Status = 16
+	StatusUnknownOpCode      Status = 17
+	StatusUnsupportedVersion Status = 18
+	StatusTooLarge           Status = 19
+	StatusInvalidArgument    Status = 20
+	StatusRequestConflict    Status = 21
+	StatusServerBusy         Status = 22
+	StatusInternalError      Status = 127
 )
 
 // Valid returns true if the status code is known. Otherwise, it returns false.
@@ -28,6 +35,8 @@ func (s Status) Valid() bool {
 		StatusUnsupportedVersion,
 		StatusTooLarge,
 		StatusInvalidArgument,
+		StatusRequestConflict,
+		StatusServerBusy,
 		StatusInternalError:
 		return true
 	default:
@@ -35,7 +44,7 @@ func (s Status) Valid() bool {
 	}
 }
 
-// String returns the status name, or a name like "Status(0xFF)" for an unknown code.
+// String returns the status name, or a name like "Status(1)" for an unknown code.
 //
 //nolint:cyclop
 func (s Status) String() string {
@@ -56,9 +65,26 @@ func (s Status) String() string {
 		return "TOO_LARGE"
 	case StatusInvalidArgument:
 		return "INVALID_ARGUMENT"
+	case StatusRequestConflict:
+		return "REQUEST_CONFLICT"
+	case StatusServerBusy:
+		return "SERVER_BUSY"
 	case StatusInternalError:
 		return "INTERNAL_ERROR"
 	default:
-		return fmt.Sprintf("Status(0x%02X)", uint8(s))
+		return fmt.Sprintf("Status(%d)", int(s))
 	}
+}
+
+func (s Status) ToPbStatus() pb.Status {
+	return pb.Status(s)
+}
+
+func StatusFromPb(status pb.Status) (Status, error) {
+	s := Status(status)
+	if !s.Valid() {
+		return 0, ErrInvalidPacket
+	}
+
+	return s, nil
 }

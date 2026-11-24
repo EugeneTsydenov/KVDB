@@ -61,10 +61,9 @@ func (h *Handler) handleDecodeError(
 	}
 
 	resp := protocol.Response{
-		Op:        header.Op,
-		RequestID: header.RequestID,
-		Status:    protocol.StatusOf(decodeErr),
-		Message:   decodeErr.Error(),
+		Header:  header,
+		Status:  protocol.StatusOf(decodeErr),
+		Message: decodeErr.Error(),
 	}
 
 	return protocol.EncodeResponse(resp)
@@ -75,9 +74,8 @@ func (h *Handler) handleDecodeError(
 //nolint:cyclop,funlen
 func (h *Handler) execute(req protocol.Request) protocol.Response {
 	resp := protocol.Response{
-		Op:        req.Op,
-		RequestID: req.RequestID,
-		Status:    protocol.StatusOK,
+		Header: req.Header,
+		Status: protocol.StatusOK,
 	}
 
 	key := string(req.Key)
@@ -85,7 +83,7 @@ func (h *Handler) execute(req protocol.Request) protocol.Response {
 
 	var err error
 
-	switch req.Op {
+	switch req.Header.Op {
 	case protocol.OpPing:
 		// No storage operation required.
 
@@ -126,9 +124,6 @@ func (h *Handler) execute(req protocol.Request) protocol.Response {
 		case err == nil:
 			if remaining > 0 {
 				resp.TTLMs = int64(remaining / time.Millisecond)
-				if remaining%time.Millisecond != 0 {
-					resp.TTLMs++
-				}
 			}
 		}
 
@@ -140,14 +135,16 @@ func (h *Handler) execute(req protocol.Request) protocol.Response {
 
 	default:
 		resp.Status = protocol.StatusUnknownOpCode
-		resp.Message = protocol.ErrUnknownOpCode.Error()
+		resp.Message = protocol.ErrUnknownOpcode.Error()
 
 		return resp
 	}
 
 	if err != nil {
 		resp.Status = statusOfStorageError(err)
-		resp.Message = err.Error()
+		if resp.Status != protocol.StatusNotFound {
+			resp.Message = err.Error()
+		}
 	}
 
 	return resp

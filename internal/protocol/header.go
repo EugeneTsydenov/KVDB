@@ -1,52 +1,40 @@
 package protocol
 
-import "encoding/binary"
+import (
+	"kvdb/internal/protocol/pb"
 
-// Header holds the fields from the first 16 bytes of a packet.
+	"google.golang.org/protobuf/proto"
+)
+
+// Header groups packet metadata in Go; it has no separate wire representation.
 type Header struct {
-	Op         OpCode
-	Status     Status
-	Flags      uint8
-	PayloadLen uint16
-	RequestID  uint64
+	Op        OpCode
+	ClientID  uint64
+	RequestID uint64
+	Sequence  uint32
 }
 
-// appendTo adds the header bytes to b and returns the new slice.
-func (h *Header) appendTo(b []byte) []byte {
-	b = appendU16(b, Magic)
-	b = appendU8(b, Version)
-	b = appendU8(b, uint8(h.Op))
-	b = appendU8(b, uint8(h.Status))
-	b = appendU8(b, h.Flags)
-	b = appendU16(b, h.PayloadLen)
-
-	return appendU64(b, h.RequestID)
-}
-
-// DecodeHeader reads and returns the packet header.
-// It returns an error if the size, magic, version or payload length is wrong.
-func DecodeHeader(packet []byte) (Header, error) {
-	if len(packet) < HeaderSize || len(packet) > MaxPacketSize {
-		return Header{}, ErrBadLength
+// DecodeHeader recovers reply metadata from a syntactically valid request.
+// Version, operation and command arguments may be invalid, but identifiers and
+// the request body must be present. Never reply to responses or ACKs.
+func DecodeHeader(data []byte) (Header, error) {
+	if len(data) == 0 {
+		return Header{}, ErrInvalidPacket
 	}
-	if binary.BigEndian.Uint16(packet[:2]) != Magic {
-		return Header{}, ErrBadMagic
+	if len(data) > MaxPacketSize {
+		return Header{}, ErrPacketTooLarge
 	}
-	if packet[2] != Version {
-		return Header{}, ErrUnsupportedVersion
+	packet := new(pb.Packet)
+	if err := proto.Unmarshal(data, packet); err != nil {
+		return Header{}, err
+	}
+	if packet.GetRequest() == nil || packet.GetClientId() == 0 ||
+		packet.GetRequestId() == 0 || packet.GetSequence() == 0 {
+		return Header{}, ErrInvalidPacket
 	}
 
-	h := Header{
-		Op:         OpCode(packet[3]),
-		Status:     Status(packet[4]),
-		Flags:      packet[5],
-		PayloadLen: binary.BigEndian.Uint16(packet[6:8]),
-		RequestID:  binary.BigEndian.Uint64(packet[8:16]),
-	}
-
-	if int(h.PayloadLen) != len(packet)-HeaderSize {
-		return Header{}, ErrBadLength
-	}
-
-	return h, nil
+	return Header{
+		Op: OpCode(packet.GetOp()), ClientID: packet.GetClientId(),
+		RequestID: packet.GetRequestId(), Sequence: packet.GetSequence(),
+	}, nil
 }

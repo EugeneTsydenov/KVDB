@@ -68,7 +68,7 @@ func (s *Server) Serve(ctx context.Context) error {
 			return fmt.Errorf("read udp: %w", err)
 		}
 
-		if n > protocol.MaxPacketSize || n < protocol.HeaderSize {
+		if n > protocol.MaxPacketSize || n == 0 {
 			log.Printf("invalid packet len: %d", n)
 
 			continue

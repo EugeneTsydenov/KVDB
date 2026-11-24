@@ -28,7 +28,7 @@ func printResponse(resp protocol.Response) error {
 		return fmt.Errorf("server returned %s", resp.Status)
 	}
 
-	switch resp.Op {
+	switch resp.Header.Op {
 	case protocol.OpPing:
 		fmt.Println("PONG")
 
@@ -56,7 +56,7 @@ func printResponse(resp protocol.Response) error {
 		}
 
 	default:
-		return fmt.Errorf("unexpected opcode: %s", resp.Op)
+		return fmt.Errorf("unexpected opcode: %s", resp.Header.Op)
 	}
 
 	return nil

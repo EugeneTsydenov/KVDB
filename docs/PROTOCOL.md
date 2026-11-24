@@ -6,7 +6,7 @@
 
 ## 1. Общие правила
 
-Все сообщения описываются в `api/proto/kvdb.proto` с использованием `proto3`. Go-код для сериализации и десериализации генерируется из этой схемы.
+Все сообщения описываются в `api/proto/v1/kvdb.proto` с использованием `proto3`. Go-код для сериализации и десериализации генерируется из этой схемы.
 
 В протоколе используются следующие типы:
 
@@ -95,7 +95,7 @@ Protobuf проверяет корректность бинарного пред
 | `7` | `EXPIRE` | Изменение TTL существующего ключа |
 | `8` | `KEYS` | Поиск ключей по регулярному выражению |
 
-Значение `OP_UNSPECIFIED = 0` не является командой. Неизвестные числовые значения `Operation` сервер обрабатывает как `UNKNOWN_OPCODE`, если может сформировать корректный ответ.
+Значение `OPERATION_UNSPECIFIED = 0` не является командой. Неизвестные числовые значения `Operation` сервер обрабатывает как `UNKNOWN_OPCODE`, если может сформировать корректный ответ.
 
 Во всех командах просроченный ключ считается отсутствующим.
 
@@ -217,9 +217,9 @@ Protobuf проверяет корректность бинарного пред
 
 | Код | Статус | Когда используется |
 |---|---|---|
-| `0` | `OK` | Команда выполнена успешно |
-| `1` | `NOT_FOUND` | Ключ отсутствует или истёк |
-| `2` | `NOT_SET` | SETNX не изменил существующий ключ |
+| `1` | `OK` | Команда выполнена успешно |
+| `2` | `NOT_FOUND` | Ключ отсутствует или истёк |
+| `3` | `NOT_SET` | SETNX не изменил существующий ключ |
 | `16` | `BAD_REQUEST` | Некорректный формат или поля сообщения |
 | `17` | `UNKNOWN_OPCODE` | Неизвестная команда |
 | `18` | `UNSUPPORTED_VERSION` | Неподдерживаемая версия протокола |
@@ -348,7 +348,7 @@ Packet {
   client_id: 100
   request_id: 1
   sequence: 1
-  op: OP_PING
+  op: OPERATION_PING
   request: {}
 }
 ```
@@ -361,7 +361,7 @@ Packet {
   client_id: 100
   request_id: 1
   sequence: 1
-  op: OP_PING
+  op: OPERATION_PING
   response: { status: STATUS_OK }
 }
 ```
@@ -374,7 +374,7 @@ Packet {
   client_id: 100
   request_id: 2
   sequence: 2
-  op: OP_GET
+  op: OPERATION_GET
   request: { key: "user:1" }
 }
 ```
@@ -387,7 +387,7 @@ Packet {
   client_id: 100
   request_id: 2
   sequence: 2
-  op: OP_GET
+  op: OPERATION_GET
   response: {
     status: STATUS_OK
     value: "Alice"
@@ -403,7 +403,7 @@ Packet {
   client_id: 100
   request_id: 3
   sequence: 3
-  op: OP_SET
+  op: OPERATION_SET
   request: {
     key: "session"
     value: "abc"
@@ -420,7 +420,7 @@ Packet {
   client_id: 100
   request_id: 3
   sequence: 3
-  op: OP_SET
+  op: OPERATION_SET
   ack: {}
 }
 ```
@@ -433,7 +433,7 @@ Packet {
   client_id: 100
   request_id: 3
   sequence: 3
-  op: OP_SET
+  op: OPERATION_SET
   response: { status: STATUS_OK }
 }
 ```
@@ -452,7 +452,7 @@ Packet {
   client_id: 100
   request_id: 4
   sequence: 4
-  op: OP_KEYS
+  op: OPERATION_KEYS
   request: {
     pattern: "user:.*"
     cursor: 0
@@ -469,7 +469,7 @@ Packet {
   client_id: 100
   request_id: 4
   sequence: 4
-  op: OP_KEYS
+  op: OPERATION_KEYS
   response: {
     status: STATUS_OK
     keys: ["user:1", "user:2"]

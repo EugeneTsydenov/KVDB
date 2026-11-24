@@ -1,6 +1,7 @@
 package protocol
 
 import (
+	"bytes"
 	"errors"
 	"regexp"
 	"unicode/utf8"
@@ -41,14 +42,30 @@ func Validate(packet *pb.Packet) error {
 		return ErrInvalidPacket
 	}
 
+	return validateBody(packet)
+}
+
+func validateBody(packet *pb.Packet) error {
 	switch body := packet.GetBody().(type) {
 	case *pb.Packet_Request:
+		if body == nil {
+			return ErrInvalidPacket
+		}
+
 		return validateRequest(packet.GetOp(), body.Request)
 
 	case *pb.Packet_Response:
+		if body == nil {
+			return ErrInvalidPacket
+		}
+
 		return validateResponse(packet.GetOp(), body.Response)
 
 	case *pb.Packet_Ack:
+		if body == nil {
+			return ErrInvalidPacket
+		}
+
 		return validateAck(packet.GetOp(), body.Ack)
 
 	default:
@@ -184,7 +201,7 @@ func validateResponse(op pb.Operation, res *pb.Response) error {
 			return ErrUnknownOpcode
 		}
 
-		if !emptyResponseData(res) {
+		if !emptyResponseData(res) || res.GetMessage() == "" {
 			return ErrInvalidPacket
 		}
 
@@ -283,7 +300,11 @@ func validateResponse(op pb.Operation, res *pb.Response) error {
 			return ErrInvalidPacket
 		}
 
-		for _, key := range res.GetKeys() {
+		for i, key := range res.GetKeys() {
+			if i > 0 && bytes.Compare(res.GetKeys()[i-1], key) > 0 {
+				return ErrInvalidPacket
+			}
+
 			if len(key) > MaxKeyLen {
 				return ErrPacketTooLarge
 			}

@@ -28,9 +28,9 @@ Key-Value база данных, вдохновлённая Redis и созда�
 Для локальной сборки и запуска проекта необходимо установить:
 
 - **Go** (версия `1.25` или выше)
-- **Task** (альтернатива `make` для автоматизации команд) — [Инструкция по установке](https://taskfile.dev/installation/)
-- **golangci-lint** — [Инструкция по установке](https://golangci-lint.run/welcome/install/)
-- **Buf** (проверка и генерация Protobuf-кода) — [Инструкция по установке](https://buf.build/docs/cli/installation/)
+- **Task** (альтернатива `make` для автоматизации команд) - [Инструкция по установке](https://taskfile.dev/installation/)
+- **golangci-lint** - [Инструкция по установке](https://golangci-lint.run/welcome/install/)
+- **Buf** (проверка и генерация Protobuf-кода) - [Инструкция по установке](https://buf.build/docs/cli/installation/)
 
 ## 🛠 Команды разработки (Taskfile)
 

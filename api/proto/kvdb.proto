@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package kvdb.v1;
+package kvdb.v2;
 
 option go_package = "kvdb/internal/protocol/pb;pb";
 

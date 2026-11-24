@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"kvdb/internal/protocol"
 )
 
 // parseRequest converts CLI arguments into a protocol request.

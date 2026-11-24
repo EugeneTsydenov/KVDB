@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"unicode"
 	"unicode/utf8"
 
@@ -15,7 +14,7 @@ import (
 func printResponse(resp protocol.Response) error {
 	switch resp.Status {
 	case protocol.StatusNotFound, protocol.StatusNotSet:
-		log.Println(resp.Status)
+		fmt.Println(resp.Status)
 
 		return nil
 
@@ -31,29 +30,29 @@ func printResponse(resp protocol.Response) error {
 
 	switch resp.Op {
 	case protocol.OpPing:
-		log.Println("PONG")
+		fmt.Println("PONG")
 
 	case protocol.OpSet, protocol.OpSetNX, protocol.OpExpire:
-		log.Println("OK")
+		fmt.Println("OK")
 
 	case protocol.OpGet:
 		printValue(resp.Value)
 
 	case protocol.OpDel:
-		log.Printf("(integer) %d\n", resp.Deleted)
+		fmt.Printf("(integer) %d\n", resp.Deleted)
 
 	case protocol.OpTTL:
-		log.Printf("(integer) %d\n", resp.TTLMs)
+		fmt.Printf("(integer) %d\n", resp.TTLMs)
 
 	case protocol.OpKeys:
 		if len(resp.Keys) == 0 {
-			log.Println("(empty list)")
+			fmt.Println("(empty list)")
 
 			return nil
 		}
 
 		for i, key := range resp.Keys {
-			log.Printf("%d) %q\n", i+1, key)
+			fmt.Printf("%d) %q\n", i+1, key)
 		}
 
 	default:
@@ -66,7 +65,7 @@ func printResponse(resp protocol.Response) error {
 // printValue prints text directly and escapes binary values.
 func printValue(value []byte) {
 	if len(value) == 0 {
-		log.Println()
+		fmt.Println()
 
 		return
 	}
@@ -83,11 +82,11 @@ func printValue(value []byte) {
 		}
 
 		if printable {
-			log.Println(string(value))
+			fmt.Println(string(value))
 
 			return
 		}
 	}
 
-	log.Printf("%q\n", value)
+	fmt.Printf("%q\n", value)
 }

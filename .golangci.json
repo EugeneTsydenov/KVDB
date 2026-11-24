@@ -76,6 +76,12 @@
                 "common-false-positives",
                 "legacy",
                 "std-error-handling"
+            ],
+            "rules": [
+            	{
+             		"path": "cmd/cli",
+               		"linters": ["forbidigo"]
+             	}
             ]
         },
         "settings": {

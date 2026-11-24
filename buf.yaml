@@ -1,0 +1,13 @@
+version: v2
+
+modules:
+  - path: api/proto/v1
+    name: buf.build/kvdb/protocol
+
+lint:
+  use:
+    - STANDARD
+
+breaking:
+  use:
+    - FILE
